@@ -2,8 +2,11 @@
 package traefik_plugin_rewrite_headers
 
 import (
+	"bufio"
 	"context"
+	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"regexp"
 )
@@ -62,7 +65,8 @@ func New(_ context.Context, next http.Handler, config *Config, name string) (htt
 }
 
 func (r *rewriteBody) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	wrappedWriter := &responseWriter{
+	var wrappedWriter *responseWriter
+	wrappedWriter = &responseWriter{
 		writer:   rw,
 		rewrites: r.rewrites,
 	}
@@ -81,6 +85,14 @@ func (r *responseWriter) Header() http.Header {
 
 func (r *responseWriter) Write(bytes []byte) (int, error) {
 	return r.writer.Write(bytes)
+}
+
+func (r *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	h, ok := r.writer.(http.Hijacker)
+	if !ok {
+		return nil, nil, errors.New("hijack not supported")
+	}
+	return h.Hijack()
 }
 
 func (r *responseWriter) WriteHeader(statusCode int) {
