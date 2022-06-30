@@ -78,6 +78,13 @@ func (r *rewriteBody) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		rewrites: r.rewrites,
 	}
 
+	if _, ok := rw.(http.Hijacker); !ok {
+		fmt.Printf("rewrite_header: could not convert rw to Hijacker")
+	}
+	if _, ok := wrappedWriter.writer.(http.Hijacker); !ok {
+		fmt.Printf("rewrite_header: could not convert wrappedWriter.writer to Hijacker")
+	}
+
 	fmt.Printf("rewrite_header Current: %T\n", rw)
 	fmt.Printf("rewrite_header Next: %T\n", r.next)
 	fmt.Printf("rewrite_header Next Writer: %T\n", wrappedWriter)
