@@ -102,6 +102,12 @@ func (r *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	return h.Hijack()
 }
 
+func (r *responseWriter) Flush() {
+	if flusher, ok := r.writer.(http.Flusher); ok {
+		flusher.Flush()
+	}
+}
+
 func (r *responseWriter) WriteHeader(statusCode int) {
 	for _, rewrite := range r.rewrites {
 		headers := r.writer.Header().Values(rewrite.header)
