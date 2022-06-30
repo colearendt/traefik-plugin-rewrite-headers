@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"regexp"
+	"runtime/debug"
 )
 
 // Rewrite holds one rewrite body configuration.
@@ -65,6 +66,12 @@ func New(_ context.Context, next http.Handler, config *Config, name string) (htt
 }
 
 func (r *rewriteBody) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Printf("Error panic! %v\n", err)
+			debug.PrintStack()
+		}
+	}()
 	var wrappedWriter *responseWriter
 	wrappedWriter = &responseWriter{
 		writer:   rw,
