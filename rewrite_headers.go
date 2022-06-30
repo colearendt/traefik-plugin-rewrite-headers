@@ -78,6 +78,10 @@ func (r *rewriteBody) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		rewrites: r.rewrites,
 	}
 
+	fmt.Printf("rewrite_header Current: %T\n", rw)
+	fmt.Printf("rewrite_header Next: %T\n", r.next)
+	fmt.Printf("rewrite_header Next Writer: %T\n", wrappedWriter)
+
 	r.next.ServeHTTP(wrappedWriter, req)
 }
 
